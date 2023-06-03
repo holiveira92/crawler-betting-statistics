@@ -1,0 +1,8 @@
+# Compiled Python bytecode
+*.py[cod]
+
+# Log files
+*.json
+
+# Exceto lista de times com urls
+!teams_list_url.json
