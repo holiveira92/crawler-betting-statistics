@@ -12,10 +12,10 @@ def getDataByUrlTeam(html_text):
     first_goal_array = getFirstGoalData(tables)
     half_time_leading = getHalfTimeLeadingData(tables)
     
-    return json.dumps({
+    return {
         'first_goal_data' : first_goal_array,
         'half_time_data' : half_time_leading
-    })
+    }
 
 def getFirstGoalData(tables):
     first_goal_array = [] # [0] => Total , [1] => Home, [2] => Away
@@ -46,8 +46,37 @@ def getHalfTimeLeadingData(tables):
     return half_time_leading
 
 
+def loadTeamsList():
+    # JSON file
+    f = open ("teams_list_url.json", "r")
+    
+    # Reading from file
+    data = json.loads(f.read())
+    
+    # Closing file
+    f.close()
+    
+    return data
+
+def writeJsonFile(team_name, output_data):
+    json_final_data = []
+    json_final_data.append(json.dumps({
+        team_name : output_data
+    }))
+    
+    json_final_data = json.dumps(json_final_data)
+    with open(team_name + '.json', 'w') as outfile:
+        outfile.write(json_final_data)
+    
+def executeCrawler(teams_list):
+    for team_name in teams_list:
+        json_data = requests.get(teams_list[team_name]).text
+        output_data = getDataByUrlTeam(json_data)
+        print(team_name)
+        print(output_data)
+        writeJsonFile(team_name, output_data)
+
+
 # Início da execução do script
-vgm_url = 'https://www.soccerstats.com/team.asp?league=brazil&teamid=1'
-json_data = requests.get(vgm_url).text
-with open('json_data.json', 'w') as outfile:
-    outfile.write(getDataByUrlTeam(json_data))
+teams_list = loadTeamsList()
+executeCrawler(teams_list)
