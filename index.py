@@ -2,7 +2,7 @@ import json
 import requests
 from bs4 import BeautifulSoup
 
-def getDataByUrlTeam(html_text):
+def getDataByUrlTeam(html_text, team_name):
     # Definindo variáveis necessárias e objetos
     soup = BeautifulSoup(html_text, 'html.parser')
 
@@ -15,10 +15,19 @@ def getDataByUrlTeam(html_text):
     opponent_leading_ht = getDataByKey(tables, "Opponent was leading at half-time")
     
     return {
-        'first_goal' : first_goal,
-        'half_time_leading' : half_time_leading,
-        'opponent_scored_first' : opponent_scored_first,
-        'opponent_leading_half_time' : opponent_leading_ht,
+        'team_name': team_name,
+        'first_goal_general' : getDataByArrayIndex(first_goal, 0),
+        'first_goal_home' : getDataByArrayIndex(first_goal, 1),
+        'first_goal_away' : getDataByArrayIndex(first_goal, 2),
+        'half_time_leading_general' : getDataByArrayIndex(half_time_leading, 0),
+        'half_time_leading_home' : getDataByArrayIndex(half_time_leading, 1),
+        'half_time_leading_away' : getDataByArrayIndex(half_time_leading, 2),
+        'opponent_scored_first_general' : getDataByArrayIndex(opponent_scored_first, 0),
+        'opponent_scored_first_home' : getDataByArrayIndex(opponent_scored_first, 1),
+        'opponent_scored_first_away' : getDataByArrayIndex(opponent_scored_first, 2),
+        'opponent_leading_half_time_general' : getDataByArrayIndex(opponent_leading_ht, 0),
+        'opponent_leading_half_time_home' : getDataByArrayIndex(opponent_leading_ht, 1),
+        'opponent_leading_half_time_away' : getDataByArrayIndex(opponent_leading_ht, 2),
     }
 
 def getDataByKey(tables, key):
@@ -58,20 +67,24 @@ def executeCrawler(teams_list):
     count = 1
     for team_name in teams_list:
         json_data = requests.get(teams_list[team_name]).text
-        output_data = getDataByUrlTeam(json_data)
+        output_data = getDataByUrlTeam(json_data, team_name)
         print("------------------------------------------------------------------------------------------------------");
         print( str(count) + "/" + str(list_qty))
         print( team_name + " :" )
         print( output_data )
         print("------------------------------------------------------------------------------------------------------");
         
-        json_final_data.append({
-            team_name : output_data
-        })
+        json_final_data.append( output_data )
         count = count + 1
     
     writeJsonFile(json_final_data)
 
+def getDataByArrayIndex(arr, index):
+    if ( index < len(arr) ) :
+        return arr[index]
+    else :
+        return 0
+    
 # Início da execução do script
 teams_list = loadTeamsList()
 executeCrawler(teams_list)
